@@ -1,14 +1,16 @@
 .product-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   grid-gap: 16px;
+  min-height: 80vh;
 }
 
 .product-card {
   display: grid;
-  grid-template-columns: 1fr auto; /* Divide the card into two columns */
-  align-items: center; /* Center align items vertically */
-  background-color: #ffffff;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.1);
+  height: 200px;
   border-radius: 4px;
   padding: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -24,7 +26,7 @@
 .product-price {
   font-size: 16px;
   margin-bottom: 8px;
-  color: #007bff;
+  color: red;
 }
 
 .product-description {
@@ -32,7 +34,7 @@
   margin-bottom: 8px;
 }
 
-.add-to-cart-button {
+.details-button {
   justify-self: end;
   background-color: #007bff;
   color: #ffffff;
@@ -43,7 +45,11 @@
   cursor: pointer;
 }
 
-.add-to-cart-button:hover {
+.details-button.disabled{
+  background-color: red;
+}
+
+.details-button:hover {
   background-color: #0056b3;
 }
 
@@ -51,6 +57,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 16px;
+  margin-top: 16px;
 }
 
 .filter-label {
@@ -85,7 +92,7 @@
   border-radius: 4px;
 }
 
-.pagination-container {
+.pagination {
   display: flex;
   justify-content: center;
   margin-top: 16px;
@@ -94,11 +101,17 @@
 .pagination-button {
   padding: 8px 16px;
   font-size: 14px;
-  background-color: #ffffff;
-  border: 1px solid #dddddd;
+  background-color: #f5f5f5;
+  border: 1px solid #f5f5f5;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+  color: #007bff;
+  background-color: #f5f5f5;
+  border-color: #007bff;
 }
 
 .pagination-button:hover {
@@ -106,9 +119,9 @@
 }
 
 .pagination-button.active {
-  background-color: #007bff;
-  color: #ffffff;
-  border-color: #007bff;
+  background-color: #f5f5f5;
+  color: #007bff;
+  border-color: #f5f5f5;
 }
 
 .filter-sort-container {
@@ -116,6 +129,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .filter-sort-container > div {
@@ -125,4 +139,19 @@
 
 .filter-sort-container > div:not(:last-child) {
   margin-right: 16px;
+}
+
+.details-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.search-container input{
+  padding: 8px;
+  border: none;
+  border-bottom: 1px solid #fff; /* White bottom line */
+  background-color: transparent;
+  color: #fff; /* Text color */
+  max-width: 100%;
+  width: 100%;
 }

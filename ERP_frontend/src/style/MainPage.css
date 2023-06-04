@@ -6,20 +6,29 @@
   padding: 20px;
 }
 
-.hero-section {
-  background-color: #f9f9f9;
+header.hero-section {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #f2f2f2;
   padding: 100px 0;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+}
+
+header.hero-section h1{
+  background-color: transparent;
+  color: #f2f2f2;
   text-align: center;
 }
 
-.hero-content {
-  color: #333;
+header.hero-content {
+  color: #f2f2f2;
 }
 
-.cta-button {
+a.cta-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #f44336;
+  background-color: #1616fb;
   color: #fff;
   text-decoration: none;
   border-radius: 4px;
@@ -28,6 +37,7 @@
 
 .cta-button:hover {
   background-color: #e53935;
+  color: #f2f2f2;
 }
 
 .featured-section {
@@ -35,34 +45,23 @@
   text-align: center;
 }
 
-.sneaker-list {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin-top: 30px;
-}
-
-.sneaker-card {
-  text-align: center;
-}
-
-.sneaker-card img {
-  width: 200px;
-  height: auto;
-}
-
 .about-section {
+  background-color: transparent;
+  color: #f2f2f2;
   padding: 50px 0;
   text-align: center;
 }
 
-.login-section {
+section.login-section {
+  background-color: transparent;
+  color: #f2f2f2;
   padding: 50px 0;
   text-align: center;
 }
 
-.footer {
-  background-color: #f9f9f9;
+footer.footer {
+  background-color: transparent;
+  color: #f2f2f2;
   padding: 20px;
   text-align: center;
 }

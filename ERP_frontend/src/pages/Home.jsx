@@ -16,26 +16,14 @@ export class Home extends Component {
             </Link>
           </div>
         </header>
-        <section className="featured-section">
-          <h2>Featured Sneakers</h2>
-          <div className="sneaker-list">
-            <div className="sneaker-card">
-              <img src="nike.png" alt="Sneaker 1" />
-              <h3>Sneaker 1</h3>
-              <p>$99.99</p>
-            </div>
-            <div className="sneaker-card">
-              <img src="sneaker2.jpg" alt="Sneaker 2" />
-              <h3>Sneaker 2</h3>
-              <p>$129.99</p>
-            </div>
-            <div className="sneaker-card">
-              <img src="sneaker3.jpg" alt="Sneaker 3" />
-              <h3>Sneaker 3</h3>
-              <p>$89.99</p>
-            </div>
+
+        <section className="center-section">
+          <div className="center-content">
+            <h2>Discover the Latest Trends</h2>
+            <p>Explore our curated selection of the hottest sneaker styles.</p>
           </div>
         </section>
+        
         <section className="about-section">
           <h2>About Us</h2>
           <p>
@@ -45,6 +33,7 @@ export class Home extends Component {
             matches your style.
           </p>
         </section>
+        
         <section className="login-section">
           <h2>Log In / Register</h2>
           <p>
@@ -55,6 +44,7 @@ export class Home extends Component {
             Log In / Register
           </Link>
         </section>
+        
         <footer className="footer">
           <p>&copy; {new Date().getFullYear()} SneakerWorld. All rights reserved.</p>
         </footer>

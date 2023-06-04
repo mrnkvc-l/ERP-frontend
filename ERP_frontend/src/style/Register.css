@@ -1,0 +1,57 @@
+.register-page {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .register-page h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .register-page form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .register-page label {
+    margin-bottom: 5px;
+  }
+  
+  .register-page input {
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .register-page button {
+    padding: 10px 16px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .register-page button:hover {
+    background-color: #45a049;
+  }
+  
+  .register-page p {
+    text-align: center;
+    margin-top: 10px;
+  }
+  
+  .register-page p a {
+    color: #4caf50;
+    font-weight: bold;
+  }
+  
+  .register-page p a:hover {
+    text-decoration: underline;
+  }
+  

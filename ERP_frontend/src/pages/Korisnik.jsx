@@ -18,6 +18,7 @@ export class Korisnik extends Component {
     this.editClick = this.editClick.bind(this);
     this.closeModal = this.closeModal.bind(this);
     this.saveChanges = this.saveChanges.bind(this);
+    this.deleteClick = this.deleteClick.bind(this); // Add this line
   }
 
   componentDidMount() {
@@ -28,7 +29,6 @@ export class Korisnik extends Component {
     const token = localStorage.getItem('token');
 
     if (!token) {
-      // No token found, handle unauthorized access
       console.log('Unauthorized access');
       return;
     }
@@ -55,15 +55,14 @@ export class Korisnik extends Component {
 
   editClick(idKorisnik) {
     // Find the selected korisnik based on idKorisnik
-    const selectedKorisnik = this.state.korisnici.find(
-      (kor) => kor.idKorisnik === idKorisnik
-    );
-
+    const selectedKorisnik = this.state.korisnici.find((kor) => kor.idKorisnik === idKorisnik);
+  
     this.setState({
       selectedKorisnik,
       showModal: true,
     });
   }
+  
 
   closeModal() {
     // Close the modal and reset the selected korisnik
@@ -76,35 +75,61 @@ export class Korisnik extends Component {
   saveChanges() {
     // Save the changes made to the selected korisnik
     const { selectedKorisnik, korisnici } = this.state;
-
+  
     // Find the index of the selected korisnik in the korisnici array
-    const selectedIndex = korisnici.findIndex(
-      (kor) => kor.idKorisnik === selectedKorisnik.idKorisnik
-    );
-
+    const selectedIndex = korisnici.findIndex((kor) => kor.idKorisnik === selectedKorisnik.idKorisnik);
+  
     // Create a new array with the updated korisnik at the selected index
     const updatedKorisnici = [...korisnici];
     updatedKorisnici[selectedIndex] = selectedKorisnik;
-
-    // Update the state with the new array of korisnici
-    this.setState({
-      korisnici: updatedKorisnici,
-      showModal: false,
-    });
+  
+    // Make an HTTP PUT request to update the korisnik on the backend
+    const token = localStorage.getItem('token');
+  
+    if (!token) {
+      // No token found, handle unauthorized access
+      console.log('Unauthorized access');
+      return;
+    }
+  
+    fetch(Variables.API_URL + `korisnici/${selectedKorisnik.idKorisnik}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(selectedKorisnik),
+    })
+      .then((response) => {
+        if (response.ok) {
+          // Update the state with the new array of korisnici
+          this.setState({
+            korisnici: updatedKorisnici,
+            showModal: false,
+          });
+        } else {
+          throw new Error('Failed to update korisnik');
+        }
+      })
+      .catch((error) => {
+        console.log('Error:', error);
+        this.setState({ error: error.message || 'Failed to update korisnik' });
+      });
   }
+  
 
   deleteClick(korId) {
     // Confirm deletion
     if (window.confirm('Are you sure you want to delete this korisnik?')) {
       // Perform deletion logic
       const token = localStorage.getItem('token');
-
+  
       if (!token) {
         // No token found, handle unauthorized access
         console.log('Unauthorized access');
         return;
       }
-
+  
       fetch(Variables.API_URL + `korisnici/${korId}`, {
         method: 'DELETE',
         headers: {
@@ -112,60 +137,140 @@ export class Korisnik extends Component {
         },
       })
         .then((response) => {
-          if (!response.ok) {
-            throw new Error('Korisnik deleted');
+          if (response.ok) {
+            // Remove the deleted korisnik from state
+            this.setState((prevState) => ({
+              korisnici: prevState.korisnici.filter((kor) => kor.idKorisnik !== korId),
+              error: null,
+            }));
+          } else {
+            throw new Error('Failed to delete korisnik');
           }
-          return response.json();
-        })
-        .then(() => {
-          // Remove the deleted korisnik from state
-          this.setState((prevState) => ({
-            korisnici: prevState.korisnici.filter((kor) => kor.idKorisnik !== korId),
-            error: null,
-          }));
         })
         .catch((error) => {
           console.log('Error:', error);
-          this.setState({ error: 'Failed to delete korisnik' });
+          this.setState({ error: error.message || 'Failed to delete korisnik' });
         });
     }
   }
+  
+  renderModal() {
+    const { selectedKorisnik } = this.state;
+  
+    if (selectedKorisnik) {
+      return (
+      <Modal show={this.state.showModal} onHide={this.closeModal} style={{color: 'black'}}>
+          <Modal.Header closeButton>
+            <Modal.Title>Edit Korisnik</Modal.Title>
+          </Modal.Header>
+          <Modal.Body style={{color: 'black'}}>
+            {/* Render the form fields for editing the selected korisnik */}
+            <div>
+              <div style={{color: 'black'}}>Selected Korisnik ID: {selectedKorisnik.idKorisnik}</div>
+              {/* Replace with your own form fields */}
+              <div>
+                <label htmlFor="ime" style={{color: 'black'}}>Ime:</label>
+                <input
+                style={{color: 'black'}}
+                  type="text"
+                  id="ime"
+                  value={selectedKorisnik.ime}
+                  onChange={(e) =>
+                    this.setState((prevState) => ({
+                      selectedKorisnik: {
+                        ...prevState.selectedKorisnik,
+                        ime: e.target.value,
+                      },
+                    }))
+                  }
+                />
+              </div>
+              <div style={{color: 'black'}}>
+                <label htmlFor="prezime" style={{color: 'black'}}>Prezime:</label>
+                <input
+                style={{color: 'black'}}
+                  type="text"
+                  id="prezime"
+                  value={selectedKorisnik.prezime}
+                  onChange={(e) =>
+                    this.setState((prevState) => ({
+                      selectedKorisnik: {
+                        ...prevState.selectedKorisnik,
+                        prezime: e.target.value,
+                      },
+                    }))
+                  }
+                />
+              </div>
+              <div>
+                
+                <label htmlFor="prezime" style={{color: 'black'}}>Prezime:</label>
+                <input
+                style={{color: 'black'}}
+                  type="text"
+                  id="prezime"
+                  value={selectedKorisnik.prezime}
+                  onChange={(e) =>
+                    this.setState((prevState) => ({
+                      selectedKorisnik: {
+                        ...prevState.selectedKorisnik,
+                        prezime: e.target.value,
+                      },
+                    }))
+                  }
+                />
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.closeModal}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={this.saveChanges}>
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      );
+    }
+  
+    return null; // Render nothing if selectedKorisnik is null or undefined
+  }
+  
 
   render() {
     
     const { korisnici, error, selectedKorisnik, showModal } = this.state;
 
     return (
-      <div>
+      <div style={{ minHeight: '80vh' }}>
         {error ? (
           <div>{error}</div>
         ) : (
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>IDKorisnik</th>
-                <th>Ime</th>
-                <th>Prezime</th>
-                <th>TipKorisnika</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Adresa</th>
-                <th>Grad</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+          <table className="table table-striped table-bordered">
+          <thead className="thead-dark">
+            <tr>
+              <th className="text-center">Ime</th>
+              <th className="text-center">Prezime</th>
+              <th className="text-center">TipKorisnika</th>
+              <th className="text-center">Username</th>
+              <th className="text-center">Email</th>
+              <th className="text-center">Adresa</th>
+              <th className="text-center">Grad</th>
+              <th className="text-center">Actions</th>
+            </tr>
+          </thead>
             <tbody>
               {korisnici.map((kor) => (
                 <tr key={kor.idKorisnik}>
-                  <td>{kor.idKorisnik}</td>
-                  <td>{kor.ime}</td>
-                  <td>{kor.prezime}</td>
-                  <td>{kor.tipKorisnika}</td>
-                  <td>{kor.username}</td>
-                  <td>{kor.email}</td>
-                  <td>{kor.adresa}</td>
-                  <td>{kor.grad}</td>
-                  <td>
+                  <td className="text-center">{kor.ime}</td>
+                  <td className="text-center">{kor.prezime}</td>
+                  <td className="text-center">{kor.tipKorisnika}</td>
+                  <td className="text-center"> {kor.username}</td>
+                  <td className="text-center">{kor.email}</td>
+                  <td className="text-center">{kor.adresa}</td>
+                  <td className="text-center">{kor.grad}</td>
+                  <td style={{ color: 'black', alignItems: 'center', justifyContent: 'center'}}>
                     <button
                       type="button"
                       className="btn btn-light mr-1"
@@ -177,7 +282,7 @@ export class Korisnik extends Component {
                         xmlns="http://www.w3.org/2000/svg"
                         width="16"
                         height="16"
-                        fill="currentColor"
+                        fill="black"
                         className="bi bi-pencil-square"
                         viewBox="0 0 16 16"
                       >
@@ -197,7 +302,7 @@ export class Korisnik extends Component {
                         xmlns="http://www.w3.org/2000/svg"
                         width="16"
                         height="16"
-                        fill="currentColor"
+                        fill="black"
                         className="bi bi-trash-fill"
                         viewBox="0 0 16 16"
                       >
@@ -211,61 +316,7 @@ export class Korisnik extends Component {
           </table>
         )}
 
-        <Modal show={showModal} onHide={this.closeModal}>
-          <Modal.Header closeButton>
-            <Modal.Title>Edit Korisnik</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {/* Render the form fields for editing the selected korisnik */}
-            {selectedKorisnik && (
-    <div>
-      <div>Selected Korisnik ID: {selectedKorisnik.idKorisnik}</div>
-      {/* Replace with your own form fields */}
-      <div>
-        <label htmlFor="ime">Ime:</label>
-        <input
-          type="text"
-          id="ime"
-          value={selectedKorisnik.ime}
-          onChange={(e) =>
-            this.setState({
-              selectedKorisnik: {
-                ...selectedKorisnik,
-                ime: e.target.value,
-              },
-            })
-          }
-        />
-      </div>
-      <div>
-        <label htmlFor="prezime">Prezime:</label>
-        <input
-          type="text"
-          id="prezime"
-          value={selectedKorisnik.prezime}
-          onChange={(e) =>
-            this.setState({
-              selectedKorisnik: {
-                ...selectedKorisnik,
-                prezime: e.target.value,
-              },
-            })
-          }
-        />
-      </div>
-      {/* Add more form fields for other properties of the selected korisnik */}
-    </div>
-  )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={this.closeModal}>
-              Close
-            </Button>
-            <Button variant="primary" onClick={this.saveChanges}>
-              Save Changes
-            </Button>
-          </Modal.Footer>
-        </Modal>
+{this.renderModal()}
       </div>
     );
   }

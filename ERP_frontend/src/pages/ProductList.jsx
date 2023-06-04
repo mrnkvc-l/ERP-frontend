@@ -19,6 +19,7 @@ export class ProductList extends Component {
       productsPerPage: 10,
       categories: [],
       searchQuery: '',
+      proizvodi: [],
     };
   }
 
@@ -36,6 +37,19 @@ export class ProductList extends Component {
       this.setState({ info: data, products: data, filteredProducts: data });
       const categories = this.getUniqueCategories(data);
       this.setState({ categories });
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+
+  fetchProizvodi = async () => {
+    try {
+      const response = await fetch(Variables.API_URL + 'infoi');
+      if (!response.ok) {
+        throw new Error('Failed to fetch proizvodi');
+      }
+      const data = await response.json();
+      this.setState({ proizvodi: data});
     } catch (error) {
       console.error('Error fetching products:', error);
     }
@@ -91,7 +105,7 @@ export class ProductList extends Component {
     if (filters.cena) {
       const [minPrice, maxPrice] = filters.cena.split('-');
       filteredProductsCopy = filteredProductsCopy.filter(
-        (info) => info.cena >= Number(minPrice) && info.cena <= Number(maxPrice)
+        (info) => info.cena*(1-info.popust) >= Number(minPrice) && info.cena*(1-info.popust) <= Number(maxPrice)
       );
     }
 
@@ -141,7 +155,7 @@ export class ProductList extends Component {
     return (
       <div>
         <div className="filter-sort-container">
-          <div className="filter-container search-container">
+          <div className="search-container">
             <input
               type="text"
               name="searchQuery"
@@ -159,10 +173,11 @@ export class ProductList extends Component {
               value={filters.kategorija}
               onChange={this.handleFilterChange}
               className="sort-select"
+              style={{ color: 'black' }}
             >
-              <option value="">All</option>
+              <option value="" style={{ color: 'black' }}>All</option>
               {categories.map((category) => (
-                <option key={category} value={category}>
+                <option key={category} value={category} style={{ color: 'black' }}>
                   {category}
                 </option>
               ))}
@@ -175,21 +190,22 @@ export class ProductList extends Component {
               name="cena"
               value={filters.cena}
               onChange={this.handleFilterChange}
+              style={{ color: 'black' }}
               className="sort-select"
             >
-              <option value="">All</option>
-              <option value="0-5000">0 - 5000</option>
-              <option value="5001-10000">5001 - 10000</option>
-              <option value="10001-20000">10001 - 20000</option>
+              <option value="" style={{ color: 'black' }}>All</option>
+              <option value="0-5000" style={{ color: 'black' }}>0 - 5000</option>
+              <option value="5001-10000" style={{ color: 'black' }}>5001 - 10000</option>
+              <option value="10001-20000" style={{ color: 'black' }}>10001 - 20000</option>
             </select>
           </div>
 
           <div className="filter-container">
             <label>Sort By:</label>
-            <select value={sortBy} onChange={this.handleSortChange} className="sort-select">
-              <option value="">None</option>
-              <option value="price-low-to-high">Price: Low to High</option>
-              <option value="price-high-to-low">Price: High to Low</option>
+            <select value={sortBy} onChange={this.handleSortChange} style={{ color: 'black' }} className="sort-select">
+              <option value="" style={{ color: 'black' }}>None</option>
+              <option value="price-low-to-high" style={{ color: 'black' }}>Price: Low to High</option>
+              <option value="price-high-to-low" style={{ color: 'black' }}>Price: High to Low</option>
             </select>
           </div>
         </div>

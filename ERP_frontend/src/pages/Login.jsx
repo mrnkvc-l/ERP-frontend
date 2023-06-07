@@ -23,29 +23,15 @@ export default class LoginPage extends Component {
       });
 
       if (response.ok) {
-        // Login successful
         const data = await response.json();
         const token = data.token;
-
-        console.log(data);
-        
-        // Handle the token, e.g., store it in local storage
         localStorage.setItem('token', token);
-
-        
-        // Redirect or perform any other actions after successful login
-        // For example, you can redirect to the home page
-
         window.location.assign("http://localhost:5173/");
-        
-        toast.success('Login successful!', { autoClose: 2000 });
       } else {
-        // Login failed
-        toast.error('Login failed!', { autoClose: 2000 });
+        toast.error(<span style={{ color: 'black' }}>Login failed!</span>);
         console.log('Login failed');
       }
     } catch (error) {
-      // Handle any network or other errors
       console.log('Error:', error);
     }
   };

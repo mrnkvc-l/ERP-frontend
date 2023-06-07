@@ -129,3 +129,6 @@
   padding-top: 10px;
 }
 
+.Toastify__toast--error .Toastify__toast-body {
+  color: black;
+}

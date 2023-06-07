@@ -67,7 +67,6 @@ export default class UserPage extends Component {
     })
       .then(response => response.json())
       .then(data => {
-        // Handle the response or perform any additional actions
         console.log('User updated:', data);
         this.setState(prevState => ({
           user: { ...prevState.updatedUser },
@@ -76,7 +75,6 @@ export default class UserPage extends Component {
       })
       .catch(error => {
         console.error('Error updating user:', error);
-        // Handle the error or display an error message
       });
   };
   

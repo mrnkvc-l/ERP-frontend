@@ -103,3 +103,34 @@
   .Toastify__toast--error .Toastify__toast-body {
     color: black;
   }
+
+  .product-images {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .main-image {
+    width: 300px;
+    height: auto;
+    margin-bottom: 10px;
+  }
+  
+  .small-images {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .small-image {
+    width: 50px;
+    height: 50px;
+    margin-right: 5px;
+    cursor: pointer;
+  }
+  
+  .small-image.selected {
+    border: 2px solid #333;
+  }
+  

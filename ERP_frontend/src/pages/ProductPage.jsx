@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { useState } from 'react';
 import { Variables } from '../Variables';
 import '../style/ProductPage.css';
 import { ToastContainer, toast } from 'react-toastify';
@@ -9,22 +10,25 @@ export default class ProductPage extends Component {
     product: null,
     selectedSize: null,
     quantity: 0,
+    imagePaths: [],
+    idInfo: null,
+    selectedImageIndex: 0,
+    selectedFile: null,
   };
 
   componentDidMount() {
     this.fetchData();
+    this.getPath();
   }
 
   fetchData = async () => {
     const path = window.location.pathname;
     const idInfo = path.split('/').pop();
-
-    console.log(idInfo);
     try {
       const response = await fetch(`${Variables.API_URL}proizvodi/info/${idInfo}`);
       if (response.ok) {
         const data = await response.json();
-        this.setState({ product: data });
+        this.setState({ product: data, idInfo: idInfo });
         console.log(data);
       } else {
         console.log('Error:', response.statusText);
@@ -35,7 +39,28 @@ export default class ProductPage extends Component {
       } else {
         console.log('Error:', error);
       }
-    }    
+    }
+  };
+
+  getPath = async () => {
+    try {
+      const path = window.location.pathname;
+      const idInfo = path.split('/').pop();
+      const response = await fetch(`${Variables.API_URL}slike/${idInfo}`);
+      if (response.ok) {
+        const data = await response.json();
+        const imagePaths = data.map((item) => item.adresa);
+        this.setState({ imagePaths });
+      } else {
+        throw new Error('Error fetching image paths');
+      }
+    } catch (error) {
+      this.setState({ error: error.message });
+    }
+  };
+
+  handleImageSelection = (index) => {
+    this.setState({ selectedImageIndex: index });
   };
 
   handleSizeSelection = (size) => {
@@ -49,18 +74,18 @@ export default class ProductPage extends Component {
     } else {
       const selectedSize = product.find((item) => item.velicina === size);
       const quantity = selectedSize ? selectedSize.ukupnaKolicina : 0;
-  
+
       this.setState({
         selectedSize: selectedSize ? selectedSize.velicina : null,
         quantity: quantity === 0 ? 0 : 1,
       });
     }
   };
-  
+
   handleQuantityChange = (event) => {
     const { value } = event.target;
     const { product, selectedSize } = this.state;
-  
+
     let updatedQuantity = parseInt(value);
     if (isNaN(updatedQuantity) || updatedQuantity < 1) {
       updatedQuantity = 1;
@@ -69,12 +94,12 @@ export default class ProductPage extends Component {
       const availableQuantity = selectedProduct ? selectedProduct.ukupnaKolicina : 0;
       const idproizvod = selectedProduct ? selectedProduct.idProizvod : null;
       updatedQuantity = Math.min(updatedQuantity, availableQuantity);
-      this.setState({ idproizvod }); // Update the idproizvod in the state
+      this.setState({ idproizvod });
     }
-  
+
     this.setState({ quantity: updatedQuantity });
   };
-  
+
   extractIdProizvod = () => {
     const { product, selectedSize } = this.state;
     const selectedProduct = product.find((item) => item.velicina === selectedSize);
@@ -103,26 +128,82 @@ export default class ProductPage extends Component {
       });
 
       if (response.ok) {
-        console.log('Item added to cart successfully!');
+        toast.success(<span style={{ color: 'black' }}>Item is in cart!</span>);
       } else if (response.status === 500) {
         toast.error(<span style={{ color: 'black' }}>Item is already in cart!</span>);
-      }else {
+      } else if (response.status === 403) {
+        toast.error(<span style={{ color: 'black' }}>You must log in first!</span>);
+      } else {
         throw new Error('Error adding item to cart');
       }
     } catch (error) {
       this.setState({ error: error.message });
     }
   };
+
+  handleFileSelect = (event) => {
+    this.setState({ selectedFile: event.target.files[0] });
+  };
+
+  handleAddPicture = async () => {
+    const { selectedFile } = this.state;
+    const token = localStorage.getItem('token');
+    const idInfo = this.state.idInfo;
+  
+    if (!selectedFile) {
+      toast.error(<span style={{ color: 'black' }}>Please select a file</span>);
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append('model.File', selectedFile);
+    formData.append('model.IDInfo', idInfo);
+  
+    try {
+      const response = await fetch('http://localhost:5164/api/slike', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+  
+      if (response.ok) {
+        const filename = await response.json();
+        toast.success(<span style={{ color: 'black' }}>Picture added: {filename}</span>);
+      } else if (response.status === 403) {
+        toast.error(<span style={{ color: 'black' }}>Access forbidden</span>);
+      } else {
+        throw new Error('Error uploading picture');
+      }
+    } catch (error) {
+      this.setState({ error: error.message });
+    }
+  };  
     
-  
   render() {
-    const { product, selectedSize, quantity } = this.state;
-  
+    const { product, selectedSize, quantity, imagePaths, selectedImageIndex, selectedFile } = this.state;
+    const { isAdmin } = this.props;
+    
     return (
       <div className="product-page">
         <ToastContainer />
         {product && (
           <div className="product-container">
+            <div className="product-images">
+              <img src={imagePaths[selectedImageIndex]} alt="Product" className="main-image" />
+              <div className="small-images">
+                {imagePaths.map((path, index) => (
+                  <img
+                    key={index}
+                    src={path}
+                    alt={`Product ${index + 1}`}
+                    className={`small-image ${selectedImageIndex === index ? 'selected' : ''}`}
+                    onClick={() => this.handleImageSelection(index)}
+                  />
+                ))}
+              </div>
+            </div>
             <div className="product-info">
               <h2 className="product-title">{product[0].proizvodInfo.naziv}</h2>
               <p className="product-description">{product[0].proizvodInfo.opis}</p>
@@ -131,11 +212,6 @@ export default class ProductPage extends Component {
               <p className="product-collection">Collection: {product[0].proizvodInfo.kolekcija.naziv}</p>
             </div>
             <div className="product-details">
-              <p className="product-price">
-                Price: {product[0].proizvodInfo.popust > 0 ? <del>{product[0].proizvodInfo.cena} RSD</del> : ''}
-                {' '}
-                {product[0].proizvodInfo.popust > 0 ? (product[0].proizvodInfo.cena * (1 - product[0].proizvodInfo.popust)).toFixed(2) : product[0].proizvodInfo.cena} RSD
-              </p>
               <h3 className="sizes-heading">Sizes:</h3>
               <div className="size-buttons">
                 {product.map((item) => (
@@ -166,6 +242,19 @@ export default class ProductPage extends Component {
                   </button>
                 </div>
               )}
+              <p className="product-price">
+                Price: {product[0].proizvodInfo.popust > 0 ? <del>{product[0].proizvodInfo.cena} RSD</del> : ''}
+                {' '}
+                {product[0].proizvodInfo.popust > 0 ? (product[0].proizvodInfo.cena * (1 - product[0].proizvodInfo.popust)).toFixed(2) : product[0].proizvodInfo.cena} RSD
+              </p>
+              {isAdmin && (
+        <div>
+          <input type="file" onChange={this.handleFileSelect} />
+          <button className="admin-button" style={{ color: 'black', marginTop: '10px' }} onClick={this.handleAddPicture}>
+            Add Picture
+          </button>
+        </div>
+      )}
             </div>
           </div>
         )}

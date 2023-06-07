@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import '../style/Cart.css';
+import { Variables } from '../Variables';
 
 export default class CartTable extends Component {
   constructor(props) {
@@ -18,7 +19,7 @@ export default class CartTable extends Component {
     try {
       const token = localStorage.getItem('token');
       console.log(token);
-      const response = await fetch('http://localhost:5164/api/stavke', {
+      const response = await fetch(`${Variables.API_URL}stavke`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -40,7 +41,7 @@ export default class CartTable extends Component {
   handleDelete = async (itemId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5164/api/stavke/${itemId}`, {
+      const response = await fetch(`${Variables.API_URL}/stavke/${itemId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
@@ -48,8 +49,6 @@ export default class CartTable extends Component {
       });
 
       if (response.ok) {
-        // Item deleted successfully
-        // You can update the UI or fetch the data again if needed
         this.fetchData();
       }else {
         throw new Error('Error deleting item');
@@ -104,7 +103,7 @@ export default class CartTable extends Component {
               <td>
               <button
                     type="button"
-                  className="btn btn-light mr-1"
+                  className="btn mr-1"
                   onClick={() => this.handleDelete(item.proizvod.idProizvod)}
                 >
                 <svg
@@ -112,6 +111,7 @@ export default class CartTable extends Component {
                     width="16"
                     height="16"
                     fill="black"
+                    color='black'
                     className="bi bi-trash-fill"
                     viewBox="0 0 16 16"
                 >

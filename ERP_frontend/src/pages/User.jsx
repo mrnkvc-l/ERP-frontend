@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { Variables } from '../Variables';
-import '../style/User.css';
+import React, { Component } from "react";
+import { Variables } from "../Variables";
+import "../style/User.css";
 
 export default class UserPage extends Component {
   constructor(props) {
@@ -8,7 +8,10 @@ export default class UserPage extends Component {
     this.state = {
       user: null,
       isEditMode: false,
-      updatedUser: null
+      updatedUser: null,
+      racuni: [],
+      expandedOrderId: null,
+      sracuna: [],
     };
   }
 
@@ -16,81 +19,110 @@ export default class UserPage extends Component {
     const token = localStorage.getItem("token");
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
 
-    const userId = decodedToken["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+    const userId =
+      decodedToken[
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+      ];
 
-    console.log(decodedToken);
-    console.log(userId);
-
-    fetch(Variables.API_URL + 'korisnici/' + userId, {
+    fetch(Variables.API_URL + "korisnici/" + userId, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
-      .then(response => response.json())
-      .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         const user = data;
         this.setState({ user, updatedUser: { ...user } });
       })
-      .catch(error => {
-        console.error('Error retrieving user information:', error);
+      .catch((error) => {
+        console.error("Error retrieving user information:", error);
+      });
+
+    fetch(Variables.API_URL + "racuni/kupac/" + userId, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const racuni = data;
+        this.setState({ racuni });
       });
   }
 
-  handleInputChange = event => {
+  handleInputChange = (event) => {
     const { name, value } = event.target;
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       updatedUser: {
         ...prevState.updatedUser,
-        [name]: value
-      }
+        [name]: value,
+      },
     }));
   };
 
   toggleEditMode = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isEditMode: !prevState.isEditMode,
-      updatedUser: { ...prevState.user }
+      updatedUser: { ...prevState.user },
     }));
   };
 
   handleUpdateUser = () => {
     const { updatedUser } = this.state;
     const token = localStorage.getItem("token");
-  
-    fetch(Variables.API_URL + 'korisnici', {
-      method: 'PUT',
+
+    fetch(Variables.API_URL + "korisnici", {
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(updatedUser)
+      body: JSON.stringify(updatedUser),
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log('User updated:', data);
-        this.setState(prevState => ({
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("User updated:", data);
+        this.setState((prevState) => ({
           user: { ...prevState.updatedUser },
-          isEditMode: false
+          isEditMode: false,
         }));
       })
-      .catch(error => {
-        console.error('Error updating user:', error);
+      .catch((error) => {
+        console.error("Error updating user:", error);
       });
   };
-  
+
+  toggleExpandedOrder = (orderId) => {
+    this.setState((prevState) => ({
+      expandedOrderId: prevState.expandedOrderId === orderId ? null : orderId,
+    }));
+    const token = localStorage.getItem("token");
+    fetch(Variables.API_URL + "sracuna/" + orderId, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const sracuna = data;
+        this.setState({ sracuna });
+        console.log(sracuna);
+      });
+  };
 
   render() {
-    const { user, isEditMode, updatedUser } = this.state;
+    const { user, isEditMode, updatedUser, racuni, expandedOrderId, sracuna } =
+      this.state;
 
     return (
-      <div className='najveci'>
+      <div className="najveci">
         <div className="user-page">
           <h1>User Page</h1>
           {user && (
             <div className="user-info">
               <h2>User Information</h2>
               <p>
-                <span className="label">Name:</span>{' '}
+                <span className="label">Name:</span>{" "}
                 {isEditMode ? (
                   <input
                     type="text"
@@ -103,7 +135,7 @@ export default class UserPage extends Component {
                 )}
               </p>
               <p>
-                <span className="label">Last Name:</span>{' '}
+                <span className="label">Last Name:</span>{" "}
                 {isEditMode ? (
                   <input
                     type="text"
@@ -116,7 +148,7 @@ export default class UserPage extends Component {
                 )}
               </p>
               <p>
-                <span className="label">Username:</span>{' '}
+                <span className="label">Username:</span>{" "}
                 {isEditMode ? (
                   <input
                     type="text"
@@ -129,7 +161,7 @@ export default class UserPage extends Component {
                 )}
               </p>
               <p>
-                <span className="label">Email:</span>{' '}
+                <span className="label">Email:</span>{" "}
                 {isEditMode ? (
                   <input
                     type="email"
@@ -142,7 +174,7 @@ export default class UserPage extends Component {
                 )}
               </p>
               <p>
-                <span className="label">Password:</span>{' '}
+                <span className="label">Password:</span>{" "}
                 {isEditMode ? (
                   <input
                     type="password"
@@ -155,7 +187,7 @@ export default class UserPage extends Component {
                 )}
               </p>
               <p>
-                <span className="label">Address:</span>{' '}
+                <span className="label">Address:</span>{" "}
                 {isEditMode ? (
                   <input
                     type="text"
@@ -168,7 +200,7 @@ export default class UserPage extends Component {
                 )}
               </p>
               <p>
-                <span className="label">City:</span>{' '}
+                <span className="label">City:</span>{" "}
                 {isEditMode ? (
                   <input
                     type="text"
@@ -182,10 +214,16 @@ export default class UserPage extends Component {
               </p>
               {isEditMode ? (
                 <div className="edit-buttons">
-                  <button className="save-button" onClick={this.handleUpdateUser}>
+                  <button
+                    className="save-button"
+                    onClick={this.handleUpdateUser}
+                  >
                     Save
                   </button>
-                  <button className="cancel-button" onClick={this.toggleEditMode}>
+                  <button
+                    className="cancel-button"
+                    onClick={this.toggleEditMode}
+                  >
                     Cancel
                   </button>
                 </div>
@@ -196,6 +234,58 @@ export default class UserPage extends Component {
               )}
             </div>
           )}
+        </div>
+        <div className="racuni-page" style={{ width: "80%" }}>
+          <h2>Previous orders:</h2>
+          <div className="table-container" style={{ width: "80%" }}>
+            <table>
+              <thead style={{ backgroundColor: "black" }}>
+                <tr>
+                  <th>Date</th>
+                  <th>Price</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {racuni.map((rac) => (
+                  <React.Fragment key={rac.idRacun}>
+                    <tr key={rac.idRacun}>
+                      <td>{new Date(rac.datum).toLocaleDateString()}</td>
+                      <td>{rac.ukupnaCena}</td>
+                      <td>
+                        <button
+                          onClick={() => this.toggleExpandedOrder(rac.idRacun)}
+                        >
+                          {expandedOrderId === rac.idRacun
+                            ? "Hide details"
+                            : "See details"}
+                        </button>
+                      </td>
+                    </tr>
+                    {expandedOrderId === rac.idRacun && (
+                      <tr>
+                        <td colSpan="3">
+                          {sracuna &&
+                            sracuna.map((item, index) => (
+                              <React.Fragment key={item.id}>
+                                <div>
+                                  <p>
+                                    Name: <a href={`http://localhost:5173/productPage/${item.proizvod.proizvodInfo.idInfo}`} style={{color: "white"}}>{item.proizvod.proizvodInfo.naziv}</a> 
+                                  </p>
+                                  <p>Size: {item.proizvod.velicina.oznaka}  Quantity: {item.kolicina}</p>
+                                  <p>Price: {item.cena}</p>
+                                </div>
+                                {index !== sracuna.length - 1 && <hr />}
+                              </React.Fragment>
+                            ))}
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     );

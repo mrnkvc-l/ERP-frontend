@@ -1,41 +1,66 @@
-  .error {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content:center;
-    color: black;
-    font-weight: bold;
-    min-height: 80vh;
-  }
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  font-weight: bold;
+  min-height: 80vh;
+}
 
-  .error button{
-    background-color: #007bff;
-  }
-  
-  .cart-table {
-    width: 80%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-  }
-  
-  .cart-table th,
-  .cart-table td {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-    background-color: rgba(0,0,0,0.1);
-  }
-  
-  .cart-table th {
-    background-color: #007bff;
-    text-align: left;
-  }
-  
-  .cart-table tr:last-child td {
-    border-bottom: none;
-  }
+.error button {
+  background-color: #007bff;
+}
 
-  .najveci{
-    min-height: 80vh;
-    justify-content: center;
-    align-items: center;
-  }
+.cart-table {
+  width: 80%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.cart-table th,
+.cart-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.cart-table th {
+  background-color: #007bff;
+  text-align: left;
+}
+
+.cart-table tr:last-child td {
+  border-bottom: none;
+}
+
+.najveci {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+form .payment-form {
+  width: 30vw;
+  min-width: 500px;
+  align-self: center;
+  box-shadow: 0px 0px 0px 0.5px rgba(50, 50, 93, 0.1),
+    0px 2px 5px 0px rgba(50, 50, 93, 0.1), 0px 1px 1.5px 0px rgba(0, 0, 0, 0.07);
+  border-radius: 7px;
+  padding: 40px;
+}
+#payment-message {
+  color: rgb(105, 115, 134);
+  font-size: 16px;
+  line-height: 20px;
+  padding-top: 12px;
+  text-align: center;
+}
+
+#payment-element {
+  margin-bottom: 24px;
+}
+
+.stripe{
+  width: 80%;
+}

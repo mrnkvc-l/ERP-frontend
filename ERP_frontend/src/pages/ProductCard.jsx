@@ -57,7 +57,8 @@ export default class ProductCard extends Component {
           <p className="product-price" >{displayPrice}</p>
           <button
             className={`details-button ${!stanje ? 'disabled' : ''}`}
-            disabled={!stanje}
+            disabled={!stanje && !isAdmin}
+            style={{marginBottom: '10px', paddingBottom: '10px'}}
             onClick={() => window.location.assign(`http://localhost:5173/productPage/${info.idInfo}`)}
           >
             {stanje ? 'Details' : 'Out of Stock'}

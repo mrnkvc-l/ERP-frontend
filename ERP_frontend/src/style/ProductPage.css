@@ -134,3 +134,20 @@
     border: 2px solid #333;
   }
   
+  .product-page-input {
+    padding: 20px;
+    min-height: 80vh;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pp-input{
+    width: 75%;
+    background-color: rgba(0,0,0,0.5);
+    margin: auto;
+    padding: 20px;
+    display: grid;
+    align-items: center;
+    justify-content:space-evenly;
+  }

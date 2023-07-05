@@ -7,21 +7,20 @@ export class Admin extends Component {
     super(props);
 
     this.state = {
-      kolekcije: [],
-      modalKolekcija: false,
-      newKolekcija: {
-        naziv: "",
-        opis: "",
+      velicine: [],
+      modalVelicina: false,
+      newVelicina: {
+        oznaka: "",
       },
     };
   }
 
   refreshList() {
-    fetch(Variables.API_URL + "kolekcije")
+    fetch(Variables.API_URL + "velicine")
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        this.setState({ kolekcije: data });
+        this.setState({ velicine: data });
       });
   }
 
@@ -29,107 +28,105 @@ export class Admin extends Component {
     this.refreshList();
   }
 
-  handleKolekcijaAdd = () => {
+  handleVelicinaAdd = () => {
     this.setState({
-      modalKolekcija: true,
-      newKolekcija: {
-        idKolekcija: "",
-        naziv: "",
-        opis: "",
+      modalVelicina: true,
+      newVelicina: {
+        idVelicina: "",
+        oznaka: "",
       },
     });
   };
 
   handleModalClose = () => {
-    this.setState({ modalKolekcija: false });
+    this.setState({ modalVelicina: false });
   };
 
-  handleInputChangeKolekcija = (e) => {
+  handleInputChangeVelicina = (e) => {
     const { name, value } = e.target;
     this.setState((prevState) => ({
-      newKolekcija: {
-        ...prevState.newKolekcija,
+      newVelicina: {
+        ...prevState.newVelicina,
         [name]: value,
       },
     }));
   };
 
-  handleKolekcijaSubmit = (e) => {
+  handleVelicinaSubmit = (e) => {
     e.preventDefault();
-    const { newKolekcija } = this.state;
+    const { newVelicina } = this.state;
     const token = localStorage.getItem("token");
 
-    if (newKolekcija.idKolekcija) {
-      this.updateKolekcija(newKolekcija, token);
+    if (newVelicina.idVelicina) {
+      this.updateVelicina(newVelicina, token);
     } else {
-      this.addKolekcija(newKolekcija, token);
+      this.addVelicina(newVelicina, token);
     }
   };
 
-  addKolekcija = (kolekcija, token) => {
-    fetch(Variables.API_URL + "kolekcije", {
+  addVelicina = (velicina, token) => {
+    fetch(Variables.API_URL + "velicine", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(kolekcija),
+      body: JSON.stringify(velicina),
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Kolekcija added:", data);
+        console.log("Velicina added:", data);
         this.refreshList();
-        this.setState({ modalKolekcija: false });
+        this.setState({ modalVelicina: false });
       })
       .catch((error) => {
-        console.error("Error adding kolekcija:", error);
+        console.error("Error adding velicina:", error);
       });
   };
 
-  updateKolekcija = (kolekcija, token) => {
-    fetch(Variables.API_URL + `kolekcije`, {
+  updateVelicina = (velicina, token) => {
+    fetch(Variables.API_URL + `velicine`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(kolekcija),
+      body: JSON.stringify(velicina),
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Kolekcija updated:", data);
+        console.log("Velicina updated:", data);
         this.refreshList();
-        this.setState({ modalKolekcija: false });
+        this.setState({ modalVelicina: false });
       })
       .catch((error) => {
-        console.error("Error updating kolekcija:", error);
+        console.error("Error updating velicina:", error);
       });
   };
 
-  handleKolekcijaEdit = (id) => {
-    const kolekcija = this.state.kolekcije.find(
-      (pdj) => pdj.idKolekcija === id
+  handleVelicinaEdit = (id) => {
+    const velicina = this.state.velicine.find(
+      (pdj) => pdj.idVelicina === id
     );
 
     this.setState({
-      newKolekcija: {
-        idKolekcija: kolekcija.idKolekcija,
-        naziv: kolekcija.naziv,
-        opis: kolekcija.opis,
+      newVelicina: {
+        idVelicina: velicina.idVelicina,
+        oznaka: velicina.oznaka,
       },
-      modalKolekcija: true,
+      modalVelicina: true,
     });
   };
 
-  handleKolekcijaDelete = (id) => {
+  handleVelicinaDelete = (id) => {
     if (
       window.confirm(
-        "Are you sure you want to permanently delete this kolekcija?"
+        "Are you sure you want to permanently delete this velicina?"
       )
     ) {
       const token = localStorage.getItem("token");
 
-      fetch(Variables.API_URL + `kolekcije/${id}`, {
+      fetch(Variables.API_URL + `velicine/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -138,40 +135,39 @@ export class Admin extends Component {
         .then((response) => {
           if (response.ok) {
             this.setState((prevState) => ({
-              kolekcije: prevState.kolekcije.filter(
-                (pdj) => pdj.idKolekcija !== id
+              velicine: prevState.velicine.filter(
+                (pdj) => pdj.idVelicina !== id
               ),
               error: null,
             }));
           } else {
-            throw new Error("Failed to delete kolekcija");
+            throw new Error("Failed to delete velicina");
           }
         })
         .catch((error) => {
           console.error("Error:", error);
           this.setState({
-            error: error.message || "Failed to delete kolekcija",
+            error: error.message || "Failed to delete velicina",
           });
         });
     }
   };
 
   render() {
-    const { kolekcije, modalKolekcija, newKolekcija } = this.state;
+    const { velicine, modalVelicina, newVelicina } = this.state;
 
     return (
       <div>
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>IDKolekcija</th>
-              <th>Naziv</th>
-              <th>Opis</th>
+              <th>IDVelicina</th>
+              <th>Oznaka</th>
               <th>
                 <button
                   type="button"
                   className="btn btn-light btn-sm float-right"
-                  onClick={this.handleKolekcijaAdd}
+                  onClick={this.handleVelicinaAdd}
                 >
                   Add
                 </button>
@@ -179,17 +175,16 @@ export class Admin extends Component {
             </tr>
           </thead>
           <tbody>
-            {kolekcije.map((pdj) => (
-              <tr key={pdj.idKolekcija}>
-                <td>{pdj.idKolekcija}</td>
-                <td>{pdj.naziv}</td>
-                <td>{pdj.opis}</td>
+            {velicine.map((pdj) => (
+              <tr key={pdj.idVelicina}>
+                <td>{pdj.idVelicina}</td>
+                <td>{pdj.oznaka}</td>
                 <td>
                   <button
                     type="button"
                     className="btn mr-1"
                     onClick={() =>
-                      this.handleKolekcijaEdit(pdj.idKolekcija)
+                      this.handleVelicinaEdit(pdj.idVelicina)
                     }
                   >
                     <svg
@@ -212,7 +207,7 @@ export class Admin extends Component {
                     type="button"
                     className="btn mr-1"
                     onClick={() =>
-                      this.handleKolekcijaDelete(pdj.idKolekcija)
+                      this.handleVelicinaDelete(pdj.idVelicina)
                     }
                   >
                     <svg
@@ -232,16 +227,16 @@ export class Admin extends Component {
           </tbody>
         </table>
 
-        {/* Modal for adding new kolekcija */}
+        {/* Modal for adding new velicina */}
         <div
-          className={`modal ${modalKolekcija ? "show" : ""}`}
-          style={{ display: modalKolekcija ? "block" : "none" }}
+          className={`modal ${modalVelicina ? "show" : ""}`}
+          style={{ display: modalVelicina ? "block" : "none" }}
         >
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title" style={{ color: "black" }}>
-                  Modal Kolekcija
+                  Modal Velicina
                 </h5>
                 <button
                   type="button"
@@ -253,33 +248,19 @@ export class Admin extends Component {
                 </button>
               </div>
               <div className="modal-body" style={{ color: "black" }}>
-                <form onSubmit={this.handleKolekcijaSubmit}>
+                <form onSubmit={this.handleVelicinaSubmit}>
                   <div className="form-group" style={{ color: "black" }}>
-                    <label htmlFor="naziv" style={{ color: "black" }}>
-                      Naziv
+                    <label htmlFor="oznaka" style={{ color: "black" }}>
+                      Oznaka
                     </label>
                     <input
                       type="text"
                       className="form-control"
-                      id="naziv"
-                      name="naziv"
+                      id="oznaka"
+                      name="oznaka"
                       style={{ color: "black" }}
-                      value={newKolekcija.naziv}
-                      onChange={this.handleInputChangeKolekcija}
-                    />
-                  </div>
-                  <div className="form-group" style={{ color: "black" }}>
-                    <label htmlFor="opis" style={{ color: "black" }}>
-                      Opis
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="opis"
-                      name="opis"
-                      style={{ color: "black" }}
-                      value={newKolekcija.opis}
-                      onChange={this.handleInputChangeKolekcija}
+                      value={newVelicina.oznaka}
+                      onChange={this.handleInputChangeVelicina}
                     />
                   </div>
                   <button

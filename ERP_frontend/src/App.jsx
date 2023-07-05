@@ -47,9 +47,26 @@ function App() {
     }
     return null;
   };
+  const getUserId = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = atob(token.split(".")[1]);
+        console.log(decodedToken);
+        const {
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": id,
+        } = JSON.parse(decodedToken);
+        console.log(id);
+        return id;
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }
 
   const isAdmin = getUserRole() === "ADMIN";
   const notlogedin = getUserRole() === null;
+  const userId = getUserId();
 
   return (
     <BrowserRouter>
@@ -101,7 +118,7 @@ function App() {
               </Navbar.Brand>
             )}
             {!notlogedin && (
-              <Navbar.Brand as={NavLink} to="/user">
+              <Navbar.Brand as={NavLink} to={`/user/${userId}`}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   height="1em"
@@ -128,7 +145,7 @@ function App() {
               path="/productPage/:idInfo"
               element={<ProductPage isAdmin={isAdmin} />}
             />
-            <Route path="/user" element={<UserPage />} />
+            <Route path={`/user/${userId}`} element={<UserPage />} />
           </Routes>
         </Container>
         <ToastContainer />

@@ -8,6 +8,7 @@ import {
 import { Variables } from "./Variables";
 
 export default function CheckoutForm() {
+
   const stripe = useStripe();
   const elements = useElements();
 
@@ -62,9 +63,10 @@ export default function CheckoutForm() {
     var Price = 0;
     var Order = "";
 
+    const tok = localStorage.getItem("token");
     fetch(`${Variables.API_URL}stavke`, {
       headers: {
-        Authorization: "Bearer " + localStorage.getItem("token"),
+        Authorization: "Bearer " + tok,
       },
     })
       .then((response) => response.json())
@@ -72,14 +74,15 @@ export default function CheckoutForm() {
         if (data != null) {
           console.log(data);
           cart = data;
+          localStorage.setItem("cartItems", cart);
           cart.forEach((element) => {
-            Price += element.cartPrice;
+            Price += element.proizvod.proizvodInfo.cena;
             console.log(Price);
           });
           TotalPrice = Price;
           console.log(TotalPrice);
 
-          return fetch(variables.API_URL + "racuni", {
+          return fetch(Variables.API_URL + "racuni", {
             method: "POST",
             headers: {
               Accept: "application/json",
@@ -87,7 +90,6 @@ export default function CheckoutForm() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              IDKupac: localStorage.getItem("ID"),
               UkupnaCena: TotalPrice,
               Datum: new Date().toISOString(),
             }),
@@ -100,10 +102,10 @@ export default function CheckoutForm() {
       .then((data) => {
         console.log(data);
         if (data != null) {
-          Order = data.idOrder;
+          Order = data.idRacun;
 
           const orderItemPromises = cart.map((item) =>
-            fetch(variables.API_URL + "sracuna", {
+            fetch(Variables.API_URL + "sracuna", {
               method: "POST",
               headers: {
                 Accept: "application/json",
@@ -112,9 +114,10 @@ export default function CheckoutForm() {
               },
               body: JSON.stringify({
                 IDRacun: Order,
-                IDProizvod: item.idProduct,
-                Kolicina: item.cartAmount,
-                Cena: item.cartPrice,
+                IDProizvod: item.proizvod.idProizvod,
+                Kolicina: item.kolicina,
+                Cena: item.proizvod.proizvodInfo.cena,
+                Popust: item.proizvod.proizvodInfo.popust,
               }),
             })
               .then((res) => {
@@ -125,7 +128,7 @@ export default function CheckoutForm() {
               })
               .then((data) => {
                 if (data != null) {
-                  return fetch(variables.API_URL + "sracun/" + item.idProduct, {
+                  return fetch(Variables.API_URL + "stavke/" + item.proizvod.idProizvod, {
                     method: "DELETE",
                     headers: {
                       Authorization: "Bearer " + localStorage.getItem("token"),
@@ -147,7 +150,7 @@ export default function CheckoutForm() {
 
         // Handle successful creation of order items
         alert("All order items created successfully");
-        this.refreshList();
+        window.location.assign("http://localhost:5173/");
       })
 
       .finally(() => {
@@ -158,7 +161,7 @@ export default function CheckoutForm() {
       elements,
       confirmParams: {
         // Make sure to change this to your payment completion page
-        return_url: "http://localhost:5173/",
+        //return_url: "http://localhost:5173/",
       },
     });
 

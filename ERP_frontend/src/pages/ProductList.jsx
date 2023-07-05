@@ -380,15 +380,6 @@ export class ProductList extends Component {
               onChange={this.handleFormInputChange}
             />
 
-            {/* Stanje */}
-            <label>Stanje:</label>
-            <input
-              type="checkbox"
-              name="Stanje"
-              checked={formValues.Stanje}
-              onChange={this.handleFormInputChange}
-            />
-
             {/* Popust */}
             <label>Popust:</label>
             <input

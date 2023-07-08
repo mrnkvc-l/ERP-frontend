@@ -37,6 +37,7 @@ function App() {
     if (token) {
       try {
         const decodedToken = atob(token.split(".")[1]);
+        console.log(decodedToken);
         const {
           "http://schemas.microsoft.com/ws/2008/06/identity/claims/role": role,
         } = JSON.parse(decodedToken);
@@ -54,7 +55,8 @@ function App() {
         const decodedToken = atob(token.split(".")[1]);
         console.log(decodedToken);
         const {
-          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": id,
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier":
+            id,
         } = JSON.parse(decodedToken);
         console.log(id);
         return id;
@@ -62,7 +64,7 @@ function App() {
         console.error("Error decoding token:", error);
       }
     }
-  }
+  };
 
   const isAdmin = getUserRole() === "ADMIN";
   const notlogedin = getUserRole() === null;

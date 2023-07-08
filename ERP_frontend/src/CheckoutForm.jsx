@@ -76,7 +76,7 @@ export default function CheckoutForm() {
           cart = data;
           localStorage.setItem("cartItems", cart);
           cart.forEach((element) => {
-            Price += element.proizvod.proizvodInfo.cena;
+            Price += element.proizvod.proizvodInfo.cena *(1 - element.proizvod.proizvodInfo.popust) * element.kolicina;
             console.log(Price);
           });
           TotalPrice = Price;
@@ -104,7 +104,7 @@ export default function CheckoutForm() {
         if (data != null) {
           Order = data.idRacun;
 
-          const orderItemPromises = cart.map((item) =>
+          const orderItemPromises = cart.map((cart) =>
             fetch(Variables.API_URL + "sracuna", {
               method: "POST",
               headers: {
@@ -114,10 +114,10 @@ export default function CheckoutForm() {
               },
               body: JSON.stringify({
                 IDRacun: Order,
-                IDProizvod: item.proizvod.idProizvod,
-                Kolicina: item.kolicina,
-                Cena: item.proizvod.proizvodInfo.cena,
-                Popust: item.proizvod.proizvodInfo.popust,
+                IDProizvod: cart.proizvod.idProizvod,
+                Kolicina: cart.kolicina,
+                Cena: cart.proizvod.proizvodInfo.cena * (1-cart.proizvod.proizvodInfo.popust),
+                Popust: cart.proizvod.proizvodInfo.popust,
               }),
             })
               .then((res) => {
@@ -128,7 +128,7 @@ export default function CheckoutForm() {
               })
               .then((data) => {
                 if (data != null) {
-                  return fetch(Variables.API_URL + "stavke/" + item.proizvod.idProizvod, {
+                  return fetch(Variables.API_URL + "stavke/" + cart.proizvod.idProizvod, {
                     method: "DELETE",
                     headers: {
                       Authorization: "Bearer " + localStorage.getItem("token"),
@@ -161,7 +161,7 @@ export default function CheckoutForm() {
       elements,
       confirmParams: {
         // Make sure to change this to your payment completion page
-        //return_url: "http://localhost:5173/",
+        return_url: "http://localhost:5173/",
       },
     });
 

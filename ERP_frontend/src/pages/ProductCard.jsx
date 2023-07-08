@@ -28,6 +28,20 @@ export default class ProductCard extends Component {
     }
   };
 
+  handleClick = () => {
+    const {info, onButtonAction} = this.props;
+    if (typeof onButtonAction === 'function') {
+      onButtonAction(info);
+    }
+  }
+
+  handleClickDelete = () => {
+    const {info, onButtonActionDel} = this.props;
+    if(typeof onButtonActionDel === 'function'){
+      onButtonActionDel(info);
+    }
+  }
+
   render() {
     const { info, isAdmin } = this.props;
     const { naziv, cena, stanje, popust } = info;  
@@ -45,6 +59,7 @@ export default class ProductCard extends Component {
 
     return (
       <div className="product-card">
+        <div className='bla'>
         <div className="product-image">
           {this.state.pathimg ? (
             <img src={this.state.pathimg} style={{ height: "200px", width: "200px" }}/>
@@ -63,6 +78,10 @@ export default class ProductCard extends Component {
           >
             {stanje ? 'Details' : 'Out of Stock'}
           </button>
+          {isAdmin ? (<button style={{color: "black"}} onClick={() => this.handleClick(info.idInfo)}>Edit</button>) : ""
+  }{isAdmin ? (<button style={{color: "black", marginTop: '5px'}} onClick={() => this.handleClickDelete(info.idInfo)}>Delete</button>) : ""
+}
+        </div>
         </div>
       </div>
     );

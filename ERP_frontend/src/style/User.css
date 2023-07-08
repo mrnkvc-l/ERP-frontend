@@ -1,11 +1,12 @@
 .najveci{
-    min-height: 80vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  min-height: 80vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 10px;
 }
 
 .user-page {
+  grid-column: 1;
     width: 600px;
     margin: 0 auto;
     padding: 20px;
@@ -26,6 +27,11 @@
     border: 1px solid #ddd;
     border-radius: 5px;
     position: relative;
+    color: #ddd;
+  }
+
+  .user-info input{
+    color: #ddd;
   }
   
   .user-info h2 {
@@ -85,6 +91,9 @@ input:focus {
   }
   .save-button, .cancel-button {
     background-color: #cc0000;
+  }
+  .racuni-page{
+    grid-column: 2;
   }
   
   .table-container {

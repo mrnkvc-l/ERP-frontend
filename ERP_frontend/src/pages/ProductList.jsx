@@ -3,6 +3,7 @@ import ProductCard from "./ProductCard";
 import { Variables } from "../Variables";
 import "../style/Product.css";
 import { toast } from "react-toastify";
+import { Modal, Button } from "react-bootstrap";
 
 export class ProductList extends Component {
   constructor(props) {
@@ -14,6 +15,7 @@ export class ProductList extends Component {
       filters: {
         kategorija: "",
         cena: "",
+        stanje: false,
       },
       sortBy: "",
       currentPage: 1,
@@ -21,13 +23,15 @@ export class ProductList extends Component {
       categories: [],
       searchQuery: "",
       proizvodi: [],
-      isFormOpen: false,
-      formValues: {
-        Naziv: "",
-        Opis: "",
+      showModal: false,
+
+      changeProduct: {
+        idInfo: null,
+        Naziv: null,
+        Opis: null,
         Stanje: false,
-        Popust: 0,
-        Cena: 0,
+        Popust: null,
+        Cena: null,
         idKategorija: 0,
         idKolekcija: 0,
         idProizvodjac: 0,
@@ -36,6 +40,8 @@ export class ProductList extends Component {
       kategorije: [],
       kolekcije: [],
       manu: [],
+
+      productDel: null,
     };
   }
 
@@ -99,12 +105,14 @@ export class ProductList extends Component {
   };
 
   handleFilterChange = (event) => {
-    const { name, value } = event.target;
+    const { name, value, type, checked } = event.target;
+    const newValue = type === "checkbox" ? checked : value;
     this.setState(
       (prevState) => ({
         filters: {
           ...prevState.filters,
           [name]: value === "All" ? "" : value,
+          [name]: newValue,
         },
         currentPage: 1,
       }),
@@ -155,6 +163,10 @@ export class ProductList extends Component {
       );
     }
 
+    if (filters.stanje) {
+      filteredProductsCopy = filteredProductsCopy.filter((info) => info.stanje);
+    }
+
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filteredProductsCopy = filteredProductsCopy.filter(
@@ -195,11 +207,24 @@ export class ProductList extends Component {
 
   openForm = () => {
     this.fetchAdmin();
-    this.setState({ isFormOpen: true });
+    this.setState({ showModal: true });
   };
 
   closeForm = () => {
-    this.setState({ isFormOpen: false });
+    this.setState({
+      changeProduct: {
+        idInfo: null,
+        Naziv: null,
+        Opis: null,
+        Stanje: false,
+        Popust: null,
+        Cena: null,
+        idKategorija: 0,
+        idKolekcija: 0,
+        idProizvodjac: 0,
+      },
+      showModal: false,
+    });
   };
 
   handleFormInputChange = (event) => {
@@ -207,41 +232,142 @@ export class ProductList extends Component {
     const newValue = type === "checkbox" ? checked : value;
 
     this.setState((prevState) => ({
-      formValues: {
-        ...prevState.formValues,
+      changeProduct: {
+        ...prevState.changeProduct,
         [name]: newValue,
       },
     }));
   };
 
   handleSaveProduct = async () => {
-    const { formValues } = this.state;
+    const { changeProduct } = this.state;
     const token = localStorage.getItem("token");
 
-    console.log("Form Values:", formValues);
+    if (changeProduct.idInfo) {
+      this.updateProduct(changeProduct, token);
+    } else {
+      this.addProduct(changeProduct, token);
+    }
+  };
 
+  addProduct = (changeProduct, token) => {
+    console.log(changeProduct);
     try {
-      const response = await fetch(Variables.API_URL + "infoi", {
+      const response = fetch(Variables.API_URL + "infoi", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formValues),
+        body: JSON.stringify({
+          Naziv: changeProduct.Naziv,
+          Opis: changeProduct.Opis,
+          Stanje: changeProduct.Stanje,
+          Popust: changeProduct.Popust,
+          Cena: changeProduct.Cena,
+          idKategorija: changeProduct.idKategorija,
+          idKolekcija: changeProduct.idKolekcija,
+          idProizvodjac: changeProduct.idProizvodjac,
+        }),
       });
 
       if (!response.ok) {
         throw new Error("Failed to save product");
       }
 
-      this.fetchProducts();
-      this.closeForm();
+      toast.success(<span style={{ color: "black" }}>Product added!</span>);
+    } catch (error) {
+      console.error("Error saving product:", error);
+    }
+    this.fetchProducts();
+    this.closeForm();
+
+    window.location.reload();
+  };
+
+  updateProduct = (changeProduct, token) => {
+    console.log(changeProduct);
+    try {
+      const response = fetch(Variables.API_URL + "infoi", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          idInfo: changeProduct.idInfo,
+          Naziv: changeProduct.Naziv,
+          Opis: changeProduct.Opis,
+          Stanje: changeProduct.Stanje,
+          Popust: changeProduct.Popust,
+          Cena: changeProduct.Cena,
+          idKategorija: changeProduct.idKategorija,
+          idKolekcija: changeProduct.idKolekcija,
+          idProizvodjac: changeProduct.idProizvodjac,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save product");
+      }
 
       toast.success(<span style={{ color: "black" }}>Product added!</span>);
     } catch (error) {
       console.error("Error saving product:", error);
     }
+    this.fetchProducts();
+    this.closeForm();
+
+    window.location.reload();
   };
+
+  handleEdit = (product) => {
+    this.setState({
+      changeProduct: {
+        idInfo: product.idInfo,
+        Naziv: product.naziv,
+        Opis: product.opis,
+        Stanje: product.stanje,
+        Popust: product.popust,
+        Cena: product.cena,
+        idKategorija: product.kategorija.idKategorija,
+        idKolekcija: product.kolekcija.idKolekcija,
+        idProizvodjac: product.proizvodjac.idProizvodjac,
+      },
+    });
+    this.openForm();
+  };
+
+  handleDelete = (productd) => {
+    if (
+      window.confirm(
+        "Are you sure you want to permanently delete this product?"
+      )
+    ) {
+      const token = localStorage.getItem("token");
+
+      fetch(Variables.API_URL + `infoi/${productd.idInfo}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((response) => {
+          if (response.ok) {
+            window.location.reload();
+          } else {
+            throw new Error("Failed to delete velicina");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          this.setState({
+            error: error.message || "Failed to delete velicina",
+          });
+        });
+    }
+
+  }
 
   render() {
     const { isAdmin } = this.props;
@@ -253,11 +379,12 @@ export class ProductList extends Component {
       productsPerPage,
       categories,
       searchQuery,
-      isFormOpen,
-      formValues,
+      showModal,
       kategorije,
       kolekcije,
       manu,
+      changeProduct,
+      productDel,
     } = this.state;
     const indexOfLastProduct = currentPage * productsPerPage;
     const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -270,6 +397,18 @@ export class ProductList extends Component {
     return (
       <div>
         <div className="filter-sort-container">
+          <div className="filter-container">
+            <label>
+              <input
+                type="checkbox"
+                name="stanje"
+                checked={filters.stanje}
+                onChange={this.handleFilterChange}
+              />
+              Show only available
+            </label>
+          </div>
+
           <div className="search-container">
             <input
               type="text"
@@ -360,123 +499,143 @@ export class ProductList extends Component {
           </button>
         )}
 
-        {isFormOpen && (
-          <div className="add-product-form">
-            {/* Naziv */}
-            <label>Naziv:</label>
-            <input
-              type="text"
-              name="Naziv"
-              value={formValues.Naziv}
-              onChange={this.handleFormInputChange}
-            />
-
-            {/* Opis */}
-            <label>Opis:</label>
-            <input
-              type="text"
-              name="Opis"
-              value={formValues.Opis}
-              onChange={this.handleFormInputChange}
-            />
-
-            {/* Popust */}
-            <label>Popust:</label>
-            <input
-              type="number"
-              name="Popust"
-              step="0.1"
-              value={formValues.Popust}
-              min="0"
-              max="1"
-              onChange={this.handleFormInputChange}
-            />
-
-            {/* Cena */}
-            <label>Cena:</label>
-            <input
-              type="number"
-              name="Cena"
-              value={formValues.Cena}
-              onChange={this.handleFormInputChange}
-            />
-
-            {/* IDKategorija */}
-            <label>ID Kategorija:</label>
-            <select
-              name="idKategorija"
-              value={formValues.idKategorija}
-              onChange={this.handleFormInputChange}
-              style={{ color: "black" }}
+        {showModal && (
+          <div className="add-product-form" color="red">
+            <Modal
+              show={showModal}
+              onHide={this.closeForm}
+              style={{ paddingTop: "100px" }}
             >
-              <option value="" style={{ color: "black" }}>
-                Select a category
-              </option>
-              {kategorije.map((kategorije) => (
-                <option
-                  key={kategorije.idKategorija}
-                  value={kategorije.idKategorija}
+              <Modal.Header closeButton>
+                <Modal.Title style={{ color: "black" }}>
+                  Modal Product
+                </Modal.Title>
+              </Modal.Header>
+              <Modal.Body style={{ color: "black" }}>
+                <label style={{ color: "black" }}>Naziv:</label>
+                <input
+                  type="text"
+                  name="Naziv"
+                  style={{ color: "black", borderBottom: "black" }}
+                  value={changeProduct.Naziv}
+                  onChange={this.handleFormInputChange}
+                  required
+                />
+
+                {/* Opis */}
+                <label style={{ color: "black" }}>Opis:</label>
+                <input
+                  type="text"
+                  name="Opis"
                   style={{ color: "black" }}
-                >
-                  {kategorije.naziv}
-                </option>
-              ))}
-            </select>
+                  value={changeProduct.Opis}
+                  onChange={this.handleFormInputChange}
+                  required
+                />
 
-            {/* IDKolekcija */}
-            <label>ID Kolekcija:</label>
-            <select
-              name="idKolekcija"
-              value={formValues.idKolekcija}
-              onChange={this.handleFormInputChange}
-              style={{ color: "black" }}
-            >
-              <option value="" style={{ color: "black" }}>
-                Select a collection
-              </option>
-              {kolekcije.map((kolekcije) => (
-                <option
-                  key={kolekcije.idKolekcija}
-                  value={kolekcije.idKolekcija}
+                {/* Popust */}
+                <label style={{ color: "black" }}>Popust:</label>
+                <input
+                  type="number"
+                  name="Popust"
+                  step="0.1"
                   style={{ color: "black" }}
-                >
-                  {kolekcije.naziv}
-                </option>
-              ))}
-            </select>
+                  value={changeProduct.Popust}
+                  min="0"
+                  max="1"
+                  onChange={this.handleFormInputChange}
+                  required
+                />
 
-            {/* IDProizvodjac */}
-            <label>ID Proizvodjac:</label>
-            <select
-              name="idProizvodjac"
-              value={formValues.idProizvodjac}
-              onChange={this.handleFormInputChange}
-              style={{ color: "black" }}
-            >
-              <option value="" style={{ color: "black" }}>
-                Select a manufacturer
-              </option>
-              {manu.map((manu) => (
-                <option
-                  key={manu.idProizvodjac}
-                  value={manu.idProizvodjac}
+                {/* Cena */}
+                <label style={{ color: "black" }}>Cena:</label>
+                <input
+                  type="number"
+                  name="Cena"
                   style={{ color: "black" }}
+                  value={changeProduct.Cena}
+                  onChange={this.handleFormInputChange}
+                  required
+                />
+
+                {/* IDKategorija */}
+                <label style={{ color: "black" }}>ID Kategorija:</label>
+                <select
+                  name="idKategorija"
+                  value={changeProduct.idKategorija}
+                  onChange={this.handleFormInputChange}
+                  style={{ color: "black" }}
+                  required
                 >
-                  {manu.naziv}
-                </option>
-              ))}
-            </select>
+                  <option value="" style={{ color: "black" }}>
+                    Select a category
+                  </option>
+                  {kategorije.map((kategorije) => (
+                    <option
+                      key={kategorije.idKategorija}
+                      value={kategorije.idKategorija}
+                      style={{ color: "black" }}
+                    >
+                      {kategorije.naziv}
+                    </option>
+                  ))}
+                </select>
 
-            <button
-              onClick={this.handleSaveProduct}
-              className="save-product-button"
-            >
-              Save Product
-            </button>
+                {/* IDKolekcija */}
+                <label style={{ color: "black" }}>ID Kolekcija:</label>
+                <select
+                  name="idKolekcija"
+                  value={changeProduct.idKolekcija}
+                  onChange={this.handleFormInputChange}
+                  style={{ color: "black" }}
+                  required
+                >
+                  <option value="" style={{ color: "black" }}>
+                    Select a collection
+                  </option>
+                  {kolekcije.map((kolekcije) => (
+                    <option
+                      key={kolekcije.idKolekcija}
+                      value={kolekcije.idKolekcija}
+                      style={{ color: "black" }}
+                    >
+                      {kolekcije.naziv}
+                    </option>
+                  ))}
+                </select>
 
-            <button onClick={this.closeForm} className="close-form-button">
-              Close
-            </button>
+                {/* IDProizvodjac */}
+                <label style={{ color: "black" }}>ID Proizvodjac:</label>
+                <select
+                  name="idProizvodjac"
+                  value={changeProduct.idProizvodjac}
+                  onChange={this.handleFormInputChange}
+                  style={{ color: "black" }}
+                  required
+                >
+                  <option value="" style={{ color: "black" }}>
+                    Select a manufacturer
+                  </option>
+                  {manu.map((manu) => (
+                    <option
+                      key={manu.idProizvodjac}
+                      value={manu.idProizvodjac}
+                      style={{ color: "black" }}
+                    >
+                      {manu.naziv}
+                    </option>
+                  ))}
+                </select>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={this.closeForm}>
+                  Close
+                </Button>
+                <Button variant="primary" onClick={this.handleSaveProduct}>
+                  Save Product
+                </Button>
+              </Modal.Footer>
+            </Modal>
           </div>
         )}
 
@@ -486,6 +645,8 @@ export class ProductList extends Component {
               key={product.idInfo}
               info={product}
               isAdmin={isAdmin}
+              onButtonAction={this.handleEdit}
+              onButtonActionDel={this.handleDelete}
             />
           ))}
         </div>

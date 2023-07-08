@@ -50,7 +50,7 @@ export default class CartTable extends Component {
     this.state = {
       cartItems: [],
       error: null,
-      openStripe: false, 
+      openStripe: false,
     };
   }
 
@@ -110,7 +110,7 @@ export default class CartTable extends Component {
 
   handleHome = () => {
     window.location.assign("http://localhost:5173/info");
-  }
+  };
 
   render() {
     const { cartItems, error, openStripe } = this.state;
@@ -132,7 +132,9 @@ export default class CartTable extends Component {
             {error === "No items in cart" && (
               <div>
                 <p>Click the button below to go to the products page.</p>
-                <button className="button" onClick={this.handleHome}>Go to Products</button>
+                <button className="button" onClick={this.handleHome}>
+                  Go to Products
+                </button>
               </div>
             )}
           </div>
@@ -202,12 +204,12 @@ export default class CartTable extends Component {
           </tfoot>
         </table>
         <div className="stripe">
-        {openStripe && (
-          <div style={{ background: "white", margin: "5px", padding: "5px" }}>
-            <Stripe />
-          </div>
-        )}
-      </div>
+          {openStripe && (
+            <div style={{ background: "white", margin: "5px", padding: "5px" }}>
+              <Stripe />
+            </div>
+          )}
+        </div>
       </div>
     );
   }

@@ -4,6 +4,7 @@ import { Variables } from "../Variables";
 import "../style/ProductPage.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Modal, Button } from 'react-bootstrap';
 
 export default class ProductPage extends Component {
   constructor(props) {
@@ -22,6 +23,7 @@ export default class ProductPage extends Component {
         ukupnaKolicina: 0,
       },
       velicine: [],
+      showModal: false,
     };
   }
 
@@ -246,6 +248,14 @@ export default class ProductPage extends Component {
     } catch (error) {
       console.error("Error saving product:", error);
     }
+
+    window.location.reload();
+  };
+
+  toggleModal = () => {
+    this.setState((prevState) => ({
+      showModal: !prevState.showModal,
+    }));
   };
 
   render() {
@@ -258,6 +268,7 @@ export default class ProductPage extends Component {
       selectedFile,
       formValues,
       velicine,
+      showModal,
     } = this.state;
     const { isAdmin } = this.props;
 
@@ -360,7 +371,51 @@ export default class ProductPage extends Component {
                       {item.velicina.oznaka}
                     </button>
                   ))}
-                  {isAdmin && <button className="size-button">+</button>}
+                  {isAdmin && <button className="size-button" onClick={this.toggleModal}>+</button>}
+                  <Modal show={showModal} onHide={this.toggleModal}>
+            <Modal.Header closeButton>
+              <Modal.Title style={{color: "black", paddingTop: '80px'}}>Add Product</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <label style={{color: "black"}}>Size:</label>
+              <select
+                name="idVelicina"
+                value={formValues.idVelicina}
+                onChange={this.handleFormInputChange}
+                className="form-control"
+                style={{color: "black", paddingBottom: '1px', height: '40px'}}
+              >
+                <option value="" style={{color: "black"}}>Select size</option>
+                {velicine.map((velicina) => (
+                  <option
+                    key={velicina.idVelicina}
+                    value={velicina.idVelicina}
+                    style={{color: "black"}}
+                  >
+                    {velicina.oznaka}
+                  </option>
+                ))}
+              </select>
+              <br />
+              <label style={{color: "black"}}>Quantity:</label>
+              <input
+                type="number"
+                name="ukupnaKolicina"
+                min="1"
+                onChange={this.handleFormInputChange}
+                className="form-control"
+                style={{color: "black"}}
+              ></input>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={this.toggleModal}>
+                Close
+              </Button>
+              <Button variant="primary" onClick={this.handleAdd}>
+                Add
+              </Button>
+            </Modal.Footer>
+          </Modal>
                 </div>
                 {selectedSize && (
                   <div className="quantity-input">
